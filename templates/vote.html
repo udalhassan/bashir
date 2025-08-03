@@ -1,0 +1,461 @@
+{% extends "base.html" %}
+
+{% block title %}Vote - Student Voting System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <i class="fas fa-vote-yea text-success display-4 mb-3"></i>
+                <h1 class="display-5 fw-bold text-primary">Cast Your Vote</h1>
+                <p class="lead text-muted">Use your unique voter ID to participate in active elections</p>
+            </div>
+
+            <!-- Voter Authentication -->
+            <div class="card shadow-lg border-0 mb-4" id="authCard">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="mb-0">
+                        <i class="fas fa-id-card me-2"></i>
+                        Voter Authentication
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form id="authForm">
+                        <div class="row align-items-end">
+                            <div class="col-md-8">
+                                <label for="voterIdInput" class="form-label fw-bold">
+                                    <i class="fas fa-key me-1"></i>Enter Your Voter ID
+                                </label>
+                                <input type="text" class="form-control form-control-lg" id="voterIdInput" 
+                                       placeholder="Paste your unique voter ID here..." required>
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Your voter ID was provided during registration
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-primary btn-lg w-100" id="authBtn">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Authenticate
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <div class="mt-3">
+                        <button class="btn btn-outline-secondary btn-sm" onclick="loadStoredVoterId()">
+                            <i class="fas fa-history me-1"></i>Use Previously Stored ID
+                        </button>
+                        <small class="text-muted ms-2">
+                            (if you registered on this device)
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Elections List -->
+            <div id="electionsContainer" style="display: none;">
+                <div class="card shadow-lg border-0">
+                    <div class="card-header bg-success text-white py-3">
+                        <h5 class="mb-0">
+                            <i class="fas fa-ballot-check me-2"></i>
+                            Active Elections
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="electionsList"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Voting Interface -->
+            <div id="votingInterface" style="display: none;">
+                <div class="card shadow-lg border-0">
+                    <div class="card-header bg-warning text-dark py-3">
+                        <h5 class="mb-0">
+                            <i class="fas fa-vote-yea me-2"></i>
+                            <span id="electionTitle">Election Name</span>
+                        </h5>
+                        <small id="electionDescription"></small>
+                    </div>
+                    <div class="card-body p-4">
+                        <div id="candidatesList"></div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <button class="btn btn-outline-secondary" onclick="backToElections()">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Elections
+                            </button>
+                            <button class="btn btn-success btn-lg" id="submitVoteBtn" onclick="submitVotes()">
+                                <i class="fas fa-check me-2"></i>Submit Votes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vote Confirmation Modal -->
+            <div class="modal fade" id="confirmationModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header bg-warning text-dark">
+                            <h5 class="modal-title">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                Confirm Your Votes
+                            </h5>
+                        </div>
+                        <div class="modal-body">
+                            <p class="fw-bold">Please review your selections:</p>
+                            <div id="votesSummary"></div>
+                            <div class="alert alert-warning mt-3">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Important:</strong> Once submitted, your votes cannot be changed.
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                Review Again
+                            </button>
+                            <button type="button" class="btn btn-success" onclick="confirmVotes()">
+                                <i class="fas fa-check me-2"></i>Confirm & Submit
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Success Modal -->
+            <div class="modal fade" id="successModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header bg-success text-white">
+                            <h5 class="modal-title">
+                                <i class="fas fa-check-circle me-2"></i>
+                                Vote Submitted Successfully!
+                            </h5>
+                        </div>
+                        <div class="modal-body text-center">
+                            <i class="fas fa-vote-yea text-success display-4 mb-3"></i>
+                            <h4>Thank you for voting!</h4>
+                            <p class="text-muted">Your vote has been recorded securely and anonymously.</p>
+                            <div class="alert alert-info">
+                                <i class="fas fa-shield-alt me-2"></i>
+                                Your vote is encrypted and cannot be traced back to you.
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <a href="{{ url_for('index') }}" class="btn btn-primary">
+                                <i class="fas fa-home me-2"></i>Return Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Notice -->
+            <div class="row mt-5">
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        <div class="row align-items-center">
+                            <div class="col-md-1 text-center">
+                                <i class="fas fa-shield-alt fa-2x text-info"></i>
+                            </div>
+                            <div class="col-md-11">
+                                <h6 class="fw-bold mb-1">Secure Voting Process</h6>
+                                <small>
+                                    Your vote is encrypted, anonymous, and secure. We use advanced cryptography 
+                                    to ensure vote integrity while protecting your privacy. Each vote is 
+                                    verified but cannot be traced back to individual voters.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+let currentVoterId = '';
+let currentElectionId = '';
+let currentSessionToken = '';
+let selectedVotes = {};
+
+document.addEventListener('DOMContentLoaded', function() {
+    const authForm = document.getElementById('authForm');
+    
+    authForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        await authenticateVoter();
+    });
+    
+    // Check if voter ID is stored locally
+    const storedVoterId = localStorage.getItem('voterID');
+    if (storedVoterId) {
+        document.getElementById('voterIdInput').value = storedVoterId;
+    }
+});
+
+function loadStoredVoterId() {
+    const storedVoterId = localStorage.getItem('voterID');
+    if (storedVoterId) {
+        document.getElementById('voterIdInput').value = storedVoterId;
+    } else {
+        alert('No stored voter ID found. Please enter your voter ID manually.');
+    }
+}
+
+async function authenticateVoter() {
+    const voterIdInput = document.getElementById('voterIdInput');
+    const authBtn = document.getElementById('authBtn');
+    
+    currentVoterId = voterIdInput.value.trim();
+    
+    if (!currentVoterId) {
+        alert('Please enter your voter ID');
+        return;
+    }
+    
+    authBtn.disabled = true;
+    authBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Authenticating...';
+    
+    try {
+        // Load active elections
+        const response = await fetch('/api/elections');
+        const elections = await response.json();
+        
+        if (elections.length === 0) {
+            alert('No active elections found.');
+            return;
+        }
+        
+        displayElections(elections);
+        
+        // Hide auth card and show elections
+        document.getElementById('authCard').style.display = 'none';
+        document.getElementById('electionsContainer').style.display = 'block';
+        
+    } catch (error) {
+        alert('Authentication failed: ' + error.message);
+    } finally {
+        authBtn.disabled = false;
+        authBtn.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>Authenticate';
+    }
+}
+
+function displayElections(elections) {
+    const container = document.getElementById('electionsList');
+    container.innerHTML = '';
+    
+    elections.forEach(election => {
+        const electionCard = document.createElement('div');
+        electionCard.className = 'border-bottom p-4';
+        electionCard.innerHTML = `
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h5 class="fw-bold text-primary mb-2">${election.title}</h5>
+                    <p class="text-muted mb-2">${election.description}</p>
+                    <small class="text-muted">
+                        <i class="fas fa-calendar me-1"></i>
+                        ${new Date(election.start_date).toLocaleDateString()} - 
+                        ${new Date(election.end_date).toLocaleDateString()}
+                    </small>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-primary" onclick="startVoting(${election.id}, '${election.title}', '${election.description}')">
+                        <i class="fas fa-vote-yea me-2"></i>Vote Now
+                    </button>
+                </div>
+            </div>
+        `;
+        container.appendChild(electionCard);
+    });
+}
+
+async function startVoting(electionId, title, description) {
+    currentElectionId = electionId;
+    
+    try {
+        // Start voting session
+        const sessionResponse = await fetch('/api/vote/start', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                voter_id: currentVoterId,
+                election_id: electionId
+            })
+        });
+        
+        const sessionResult = await sessionResponse.json();
+        
+        if (!sessionResponse.ok) {
+            throw new Error(sessionResult.error);
+        }
+        
+        currentSessionToken = sessionResult.session_token;
+        
+        // Load candidates
+        const candidatesResponse = await fetch(`/api/elections/${electionId}/candidates`);
+        const candidates = await candidatesResponse.json();
+        
+        displayVotingInterface(title, description, candidates);
+        
+    } catch (error) {
+        alert('Failed to start voting: ' + error.message);
+    }
+}
+
+function displayVotingInterface(title, description, candidates) {
+    document.getElementById('electionTitle').textContent = title;
+    document.getElementById('electionDescription').textContent = description;
+    
+    const candidatesContainer = document.getElementById('candidatesList');
+    candidatesContainer.innerHTML = '';
+    selectedVotes = {};
+    
+    // Group candidates by position
+    const positions = {};
+    candidates.forEach(candidate => {
+        if (!positions[candidate.position]) {
+            positions[candidate.position] = [];
+        }
+        positions[candidate.position].push(candidate);
+    });
+    
+    // Display each position
+    Object.keys(positions).forEach(position => {
+        const positionDiv = document.createElement('div');
+        positionDiv.className = 'mb-4';
+        
+        let positionHtml = `
+            <h6 class="fw-bold text-primary mb-3">
+                <i class="fas fa-user-tie me-2"></i>${position}
+            </h6>
+            <div class="row g-3">
+        `;
+        
+        positions[position].forEach(candidate => {
+            positionHtml += `
+                <div class="col-md-6">
+                    <div class="card candidate-card" onclick="selectCandidate(${candidate.id}, '${position}')">
+                        <div class="card-body">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="${position}" 
+                                       id="candidate_${candidate.id}" value="${candidate.id}">
+                                <label class="form-check-label w-100" for="candidate_${candidate.id}">
+                                    <h6 class="fw-bold">${candidate.first_name} ${candidate.last_name}</h6>
+                                    <small class="text-muted">${candidate.department} - Year ${candidate.year_of_study}</small>
+                                    ${candidate.manifesto ? `<p class="small mt-2">${candidate.manifesto}</p>` : ''}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        positionHtml += '</div>';
+        positionDiv.innerHTML = positionHtml;
+        candidatesContainer.appendChild(positionDiv);
+    });
+    
+    // Hide elections and show voting interface
+    document.getElementById('electionsContainer').style.display = 'none';
+    document.getElementById('votingInterface').style.display = 'block';
+}
+
+function selectCandidate(candidateId, position) {
+    selectedVotes[position] = candidateId;
+    
+    // Update visual selection
+    document.getElementById(`candidate_${candidateId}`).checked = true;
+    
+    // Update card styling
+    document.querySelectorAll('.candidate-card').forEach(card => {
+        card.classList.remove('border-success', 'bg-light');
+    });
+    
+    const selectedCard = document.getElementById(`candidate_${candidateId}`).closest('.candidate-card');
+    selectedCard.classList.add('border-success', 'bg-light');
+}
+
+function submitVotes() {
+    if (Object.keys(selectedVotes).length === 0) {
+        alert('Please select at least one candidate before submitting.');
+        return;
+    }
+    
+    // Show confirmation modal
+    const summaryDiv = document.getElementById('votesSummary');
+    summaryDiv.innerHTML = '';
+    
+    Object.keys(selectedVotes).forEach(position => {
+        const candidateId = selectedVotes[position];
+        const candidateLabel = document.querySelector(`label[for="candidate_${candidateId}"]`);
+        const candidateName = candidateLabel.querySelector('h6').textContent;
+        
+        summaryDiv.innerHTML += `
+            <div class="mb-2">
+                <strong>${position}:</strong> ${candidateName}
+            </div>
+        `;
+    });
+    
+    const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+    modal.show();
+}
+
+async function confirmVotes() {
+    const confirmationModal = bootstrap.Modal.getInstance(document.getElementById('confirmationModal'));
+    confirmationModal.hide();
+    
+    const submitBtn = document.getElementById('submitVoteBtn');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
+    
+    try {
+        const votes = Object.keys(selectedVotes).map(position => ({
+            candidate_id: selectedVotes[position],
+            position: position
+        }));
+        
+        const response = await fetch('/api/vote/cast', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                session_token: currentSessionToken,
+                votes: votes
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(result.error);
+        }
+        
+        // Show success modal
+        const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+        successModal.show();
+        
+    } catch (error) {
+        alert('Failed to submit votes: ' + error.message);
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-check me-2"></i>Submit Votes';
+    }
+}
+
+function backToElections() {
+    document.getElementById('votingInterface').style.display = 'none';
+    document.getElementById('electionsContainer').style.display = 'block';
+}
+</script>
+{% endblock %}

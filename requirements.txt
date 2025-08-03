@@ -1,0 +1,7 @@
+Flask==2.3.3
+Flask-CORS==4.0.0
+Werkzeug==2.3.7
+qrcode[pil]==7.4.2
+Pillow==10.0.1
+hashlib-compat==1.0.1
+python-dateutil==2.8.2
