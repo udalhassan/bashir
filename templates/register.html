@@ -1,0 +1,314 @@
+{% extends "base.html" %}
+
+{% block title %}Student Registration - Student Voting System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <i class="fas fa-user-plus text-primary display-4 mb-3"></i>
+                <h1 class="display-5 fw-bold text-primary">Student Registration</h1>
+                <p class="lead text-muted">Register to receive your unique digital voter ID</p>
+            </div>
+
+            <!-- Registration Form -->
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="mb-0">
+                        <i class="fas fa-id-card me-2"></i>
+                        Create Your Digital Voter Account
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form id="registrationForm">
+                        <div class="row g-3">
+                            <!-- Student Number -->
+                            <div class="col-md-6">
+                                <label for="studentNumber" class="form-label fw-bold">
+                                    <i class="fas fa-hashtag me-1"></i>Student Number *
+                                </label>
+                                <input type="text" class="form-control" id="studentNumber" name="student_number" 
+                                       placeholder="e.g., 2024001234" required>
+                                <div class="form-text">Your official university student number</div>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="col-md-6">
+                                <label for="email" class="form-label fw-bold">
+                                    <i class="fas fa-envelope me-1"></i>Email Address *
+                                </label>
+                                <input type="email" class="form-control" id="email" name="email" 
+                                       placeholder="student@university.edu" required>
+                                <div class="form-text">Use your university email address</div>
+                            </div>
+
+                            <!-- First Name -->
+                            <div class="col-md-6">
+                                <label for="firstName" class="form-label fw-bold">
+                                    <i class="fas fa-user me-1"></i>First Name *
+                                </label>
+                                <input type="text" class="form-control" id="firstName" name="first_name" 
+                                       placeholder="John" required>
+                            </div>
+
+                            <!-- Last Name -->
+                            <div class="col-md-6">
+                                <label for="lastName" class="form-label fw-bold">
+                                    <i class="fas fa-user me-1"></i>Last Name *
+                                </label>
+                                <input type="text" class="form-control" id="lastName" name="last_name" 
+                                       placeholder="Doe" required>
+                            </div>
+
+                            <!-- Department -->
+                            <div class="col-md-8">
+                                <label for="department" class="form-label fw-bold">
+                                    <i class="fas fa-building me-1"></i>Department *
+                                </label>
+                                <select class="form-select" id="department" name="department" required>
+                                    <option value="">Select your department</option>
+                                    <option value="Computer Science">Computer Science</option>
+                                    <option value="Engineering">Engineering</option>
+                                    <option value="Business Administration">Business Administration</option>
+                                    <option value="Medicine">Medicine</option>
+                                    <option value="Law">Law</option>
+                                    <option value="Arts and Humanities">Arts and Humanities</option>
+                                    <option value="Social Sciences">Social Sciences</option>
+                                    <option value="Natural Sciences">Natural Sciences</option>
+                                    <option value="Education">Education</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+
+                            <!-- Year of Study -->
+                            <div class="col-md-4">
+                                <label for="yearOfStudy" class="form-label fw-bold">
+                                    <i class="fas fa-graduation-cap me-1"></i>Year of Study *
+                                </label>
+                                <select class="form-select" id="yearOfStudy" name="year_of_study" required>
+                                    <option value="">Year</option>
+                                    <option value="1">1st Year</option>
+                                    <option value="2">2nd Year</option>
+                                    <option value="3">3rd Year</option>
+                                    <option value="4">4th Year</option>
+                                    <option value="5">5th Year</option>
+                                    <option value="6">Graduate</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Terms and Conditions -->
+                        <div class="mt-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="agreeTerms" required>
+                                <label class="form-check-label" for="agreeTerms">
+                                    I agree to the <a href="#" class="text-primary">Terms and Conditions</a> and 
+                                    <a href="#" class="text-primary">Privacy Policy</a> *
+                                </label>
+                            </div>
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="checkbox" id="agreeVoting">
+                                <label class="form-check-label" for="agreeVoting">
+                                    I understand that my voter ID will be used for secure, anonymous voting
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                                <i class="fas fa-user-plus me-2"></i>
+                                Register & Generate Voter ID
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Success Modal -->
+            <div class="modal fade" id="successModal" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header bg-success text-white">
+                            <h5 class="modal-title">
+                                <i class="fas fa-check-circle me-2"></i>
+                                Registration Successful!
+                            </h5>
+                        </div>
+                        <div class="modal-body text-center">
+                            <div class="mb-4">
+                                <i class="fas fa-id-card text-success display-1 mb-3"></i>
+                                <h4 class="text-success">Your Digital Voter ID has been generated!</h4>
+                                <p class="text-muted">Keep this information secure and accessible for voting.</p>
+                            </div>
+
+                            <!-- Voter ID Display -->
+                            <div class="card bg-light mb-4">
+                                <div class="card-body">
+                                    <h6 class="fw-bold mb-3">Your Unique Voter ID:</h6>
+                                    <div class="bg-white p-3 rounded border">
+                                        <code id="voterIdDisplay" class="fs-6 text-primary"></code>
+                                    </div>
+                                    <button class="btn btn-outline-primary btn-sm mt-2" onclick="copyVoterId()">
+                                        <i class="fas fa-copy me-1"></i>Copy ID
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- QR Code -->
+                            <div class="card bg-light mb-4">
+                                <div class="card-body">
+                                    <h6 class="fw-bold mb-3">Your QR Code:</h6>
+                                    <img id="qrCodeDisplay" class="img-fluid" style="max-width: 200px;" alt="QR Code">
+                                    <div class="mt-2">
+                                        <button class="btn btn-outline-success btn-sm" onclick="downloadQR()">
+                                            <i class="fas fa-download me-1"></i>Download QR
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Important:</strong> Save your Voter ID and QR code. You'll need them to vote in elections.
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <a href="{{ url_for('voter_card_page') }}" class="btn btn-primary">
+                                <i class="fas fa-id-card me-2"></i>View Digital Voter Card
+                            </a>
+                            <a href="{{ url_for('vote_page') }}" class="btn btn-success">
+                                <i class="fas fa-vote-yea me-2"></i>Go to Voting
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Info -->
+            <div class="row mt-5">
+                <div class="col-12">
+                    <div class="card border-success">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0">
+                                <i class="fas fa-shield-alt me-2"></i>
+                                Security & Privacy Information
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold text-success">
+                                        <i class="fas fa-lock me-1"></i>Data Security
+                                    </h6>
+                                    <ul class="list-unstyled small">
+                                        <li><i class="fas fa-check text-success me-1"></i>256-bit encryption</li>
+                                        <li><i class="fas fa-check text-success me-1"></i>Secure hash algorithms</li>
+                                        <li><i class="fas fa-check text-success me-1"></i>No personal data in votes</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold text-success">
+                                        <i class="fas fa-user-shield me-1"></i>Privacy Protection
+                                    </h6>
+                                    <ul class="list-unstyled small">
+                                        <li><i class="fas fa-check text-success me-1"></i>Anonymous voting</li>
+                                        <li><i class="fas fa-check text-success me-1"></i>Data minimization</li>
+                                        <li><i class="fas fa-check text-success me-1"></i>GDPR compliant</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('registrationForm');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Disable submit button
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Registering...';
+        
+        try {
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            
+            const response = await fetch('/api/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                // Show success modal
+                document.getElementById('voterIdDisplay').textContent = result.voter_id;
+                document.getElementById('qrCodeDisplay').src = 'data:image/png;base64,' + result.qr_code;
+                
+                // Store voter ID for later use
+                localStorage.setItem('voterID', result.voter_id);
+                localStorage.setItem('qrCode', result.qr_code);
+                
+                const modal = new bootstrap.Modal(document.getElementById('successModal'));
+                modal.show();
+                
+                // Reset form
+                form.reset();
+            } else {
+                throw new Error(result.error || 'Registration failed');
+            }
+        } catch (error) {
+            alert('Registration failed: ' + error.message);
+        } finally {
+            // Re-enable submit button
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-user-plus me-2"></i>Register & Generate Voter ID';
+        }
+    });
+});
+
+function copyVoterId() {
+    const voterIdText = document.getElementById('voterIdDisplay').textContent;
+    navigator.clipboard.writeText(voterIdText).then(() => {
+        // Show temporary success message
+        const btn = event.target;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check me-1"></i>Copied!';
+        btn.classList.add('btn-success');
+        btn.classList.remove('btn-outline-primary');
+        
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-outline-primary');
+        }, 2000);
+    });
+}
+
+function downloadQR() {
+    const qrCode = localStorage.getItem('qrCode');
+    if (qrCode) {
+        const link = document.createElement('a');
+        link.href = 'data:image/png;base64,' + qrCode;
+        link.download = 'voter-qr-code.png';
+        link.click();
+    }
+}
+</script>
+{% endblock %}

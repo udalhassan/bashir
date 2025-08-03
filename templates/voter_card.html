@@ -1,0 +1,459 @@
+{% extends "base.html" %}
+
+{% block title %}Digital Voter Card - Student Voting System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <i class="fas fa-id-card text-primary display-4 mb-3"></i>
+                <h1 class="display-5 fw-bold text-primary">Digital Voter Card</h1>
+                <p class="lead text-muted">Access and manage your digital voter identity</p>
+            </div>
+
+            <!-- Voter ID Input -->
+            <div class="card shadow-lg border-0 mb-4" id="inputCard">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="mb-0">
+                        <i class="fas fa-search me-2"></i>
+                        Retrieve Your Voter Card
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form id="voterCardForm">
+                        <div class="row align-items-end">
+                            <div class="col-md-8">
+                                <label for="voterIdInput" class="form-label fw-bold">
+                                    <i class="fas fa-key me-1"></i>Enter Your Voter ID
+                                </label>
+                                <input type="text" class="form-control form-control-lg" id="voterIdInput" 
+                                       placeholder="Paste your unique voter ID here..." required>
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Your voter ID was provided during registration
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-primary btn-lg w-100" id="retrieveBtn">
+                                    <i class="fas fa-id-card me-2"></i>Get Card
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <div class="mt-3">
+                        <button class="btn btn-outline-secondary btn-sm" onclick="loadStoredVoterId()">
+                            <i class="fas fa-history me-1"></i>Use Previously Stored ID
+                        </button>
+                        <small class="text-muted ms-2">
+                            (if you registered on this device)
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Digital Voter Card Display -->
+            <div id="voterCardDisplay" style="display: none;">
+                <div class="card shadow-lg border-0 voter-card-container">
+                    <div class="card-header bg-gradient-primary text-white py-3">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-id-card me-2"></i>
+                                    Official Digital Voter Card
+                                </h5>
+                                <small>University Student Elections</small>
+                            </div>
+                            <div class="col-auto">
+                                <span class="badge bg-success fs-6 px-3 py-2">
+                                    <i class="fas fa-check-circle me-1"></i>ACTIVE
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row">
+                            <!-- Student Information -->
+                            <div class="col-md-8">
+                                <div class="row mb-3">
+                                    <div class="col-sm-4 fw-bold text-muted">Full Name:</div>
+                                    <div class="col-sm-8" id="studentName">-</div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-sm-4 fw-bold text-muted">Student Number:</div>
+                                    <div class="col-sm-8" id="studentNumber">-</div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-sm-4 fw-bold text-muted">Department:</div>
+                                    <div class="col-sm-8" id="department">-</div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-sm-4 fw-bold text-muted">Year of Study:</div>
+                                    <div class="col-sm-8" id="yearOfStudy">-</div>
+                                </div>
+                                
+                                <hr>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-sm-4 fw-bold text-muted">Voter ID:</div>
+                                    <div class="col-sm-8">
+                                        <code class="text-primary fs-6" id="voterIdDisplay">-</code>
+                                        <button class="btn btn-outline-primary btn-sm ms-2" onclick="copyVoterId()">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-sm-4 fw-bold text-muted">Issued:</div>
+                                    <div class="col-sm-8" id="issuedDate">-</div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-sm-4 fw-bold text-muted">Expires:</div>
+                                    <div class="col-sm-8" id="expiryDate">-</div>
+                                </div>
+                            </div>
+                            
+                            <!-- QR Code -->
+                            <div class="col-md-4 text-center">
+                                <div class="qr-code-container bg-white p-3 rounded border">
+                                    <img id="qrCodeImage" class="img-fluid" style="max-width: 180px;" alt="QR Code">
+                                </div>
+                                <small class="text-muted d-block mt-2">
+                                    <i class="fas fa-qrcode me-1"></i>
+                                    Scan for quick verification
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <!-- Security Features -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="alert alert-info">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-1 text-center">
+                                            <i class="fas fa-shield-alt fa-2x text-info"></i>
+                                        </div>
+                                        <div class="col-md-11">
+                                            <h6 class="fw-bold mb-1">Security Features</h6>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <small>
+                                                        <i class="fas fa-check text-success me-1"></i>256-bit SHA encryption<br>
+                                                        <i class="fas fa-check text-success me-1"></i>Unique cryptographic hash<br>
+                                                        <i class="fas fa-check text-success me-1"></i>Tamper-proof design
+                                                    </small>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <small>
+                                                        <i class="fas fa-check text-success me-1"></i>QR code verification<br>
+                                                        <i class="fas fa-check text-success me-1"></i>Time-based validation<br>
+                                                        <i class="fas fa-check text-success me-1"></i>Anonymous voting link
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="d-flex flex-wrap gap-2 justify-content-center">
+                                    <button class="btn btn-success" onclick="downloadCard()">
+                                        <i class="fas fa-download me-2"></i>Download Card
+                                    </button>
+                                    <button class="btn btn-primary" onclick="printCard()">
+                                        <i class="fas fa-print me-2"></i>Print Card
+                                    </button>
+                                    <button class="btn btn-info" onclick="downloadQR()">
+                                        <i class="fas fa-qrcode me-2"></i>Download QR
+                                    </button>
+                                    <a href="{{ url_for('vote_page') }}" class="btn btn-warning">
+                                        <i class="fas fa-vote-yea me-2"></i>Vote Now
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-light text-center">
+                        <small class="text-muted">
+                            <i class="fas fa-university me-1"></i>
+                            Official University Student Elections • Powered by Secure Digital Voting System
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Usage Instructions -->
+            <div class="row mt-5">
+                <div class="col-12">
+                    <div class="card border-info">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0">
+                                <i class="fas fa-info-circle me-2"></i>
+                                How to Use Your Digital Voter Card
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold text-info">
+                                        <i class="fas fa-mobile-alt me-1"></i>For Mobile Voting
+                                    </h6>
+                                    <ul class="list-unstyled small">
+                                        <li><i class="fas fa-arrow-right text-info me-1"></i>Keep your Voter ID handy</li>
+                                        <li><i class="fas fa-arrow-right text-info me-1"></i>Visit the voting page</li>
+                                        <li><i class="fas fa-arrow-right text-info me-1"></i>Enter your Voter ID to authenticate</li>
+                                        <li><i class="fas fa-arrow-right text-info me-1"></i>Cast your votes securely</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold text-info">
+                                        <i class="fas fa-qrcode me-1"></i>QR Code Features
+                                    </h6>
+                                    <ul class="list-unstyled small">
+                                        <li><i class="fas fa-arrow-right text-info me-1"></i>Quick identity verification</li>
+                                        <li><i class="fas fa-arrow-right text-info me-1"></i>Scannable by election officials</li>
+                                        <li><i class="fas fa-arrow-right text-info me-1"></i>Contains encrypted voter data</li>
+                                        <li><i class="fas fa-arrow-right text-info me-1"></i>Backup access method</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+let currentVoterData = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('voterCardForm');
+    
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        await retrieveVoterCard();
+    });
+    
+    // Check if voter ID is stored locally
+    const storedVoterId = localStorage.getItem('voterID');
+    if (storedVoterId) {
+        document.getElementById('voterIdInput').value = storedVoterId;
+    }
+});
+
+function loadStoredVoterId() {
+    const storedVoterId = localStorage.getItem('voterID');
+    if (storedVoterId) {
+        document.getElementById('voterIdInput').value = storedVoterId;
+    } else {
+        alert('No stored voter ID found. Please enter your voter ID manually.');
+    }
+}
+
+async function retrieveVoterCard() {
+    const voterIdInput = document.getElementById('voterIdInput');
+    const retrieveBtn = document.getElementById('retrieveBtn');
+    
+    const voterId = voterIdInput.value.trim();
+    
+    if (!voterId) {
+        alert('Please enter your voter ID');
+        return;
+    }
+    
+    retrieveBtn.disabled = true;
+    retrieveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Retrieving...';
+    
+    try {
+        const response = await fetch(`/api/voter-card/${voterId}`);
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.error || 'Failed to retrieve voter card');
+        }
+        
+        currentVoterData = data;
+        displayVoterCard(data);
+        
+        // Hide input card and show voter card
+        document.getElementById('inputCard').style.display = 'none';
+        document.getElementById('voterCardDisplay').style.display = 'block';
+        
+    } catch (error) {
+        alert('Failed to retrieve voter card: ' + error.message);
+    } finally {
+        retrieveBtn.disabled = false;
+        retrieveBtn.innerHTML = '<i class="fas fa-id-card me-2"></i>Get Card';
+    }
+}
+
+function displayVoterCard(data) {
+    // Populate student information
+    document.getElementById('studentName').textContent = data.student_name;
+    document.getElementById('studentNumber').textContent = data.student_number;
+    document.getElementById('department').textContent = data.department;
+    document.getElementById('yearOfStudy').textContent = getYearText(data.year_of_study);
+    
+    // Populate voter information
+    document.getElementById('voterIdDisplay').textContent = data.voter_id;
+    document.getElementById('issuedDate').textContent = formatDate(data.issued_at);
+    document.getElementById('expiryDate').textContent = formatDate(data.expires_at);
+    
+    // Display QR code
+    document.getElementById('qrCodeImage').src = 'data:image/png;base64,' + data.qr_code;
+}
+
+function getYearText(year) {
+    const yearTexts = {
+        1: '1st Year',
+        2: '2nd Year', 
+        3: '3rd Year',
+        4: '4th Year',
+        5: '5th Year',
+        6: 'Graduate'
+    };
+    return yearTexts[year] || `Year ${year}`;
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+}
+
+function copyVoterId() {
+    const voterIdText = document.getElementById('voterIdDisplay').textContent;
+    navigator.clipboard.writeText(voterIdText).then(() => {
+        // Show temporary success message
+        const btn = event.target;
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check"></i>';
+        btn.classList.add('btn-success');
+        btn.classList.remove('btn-outline-primary');
+        
+        setTimeout(() => {
+            btn.innerHTML = originalHtml;
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-outline-primary');
+        }, 2000);
+    }).catch(() => {
+        alert('Failed to copy voter ID to clipboard');
+    });
+}
+
+function downloadCard() {
+    if (!currentVoterData) return;
+    
+    // Create a printable version of the card
+    const cardElement = document.querySelector('.voter-card-container');
+    
+    // Use html2canvas or similar library to convert to image
+    // For now, we'll create a simple text version
+    const cardData = `
+DIGITAL VOTER CARD
+University Student Elections
+
+Name: ${currentVoterData.student_name}
+Student Number: ${currentVoterData.student_number}
+Department: ${currentVoterData.department}
+Year: ${getYearText(currentVoterData.year_of_study)}
+
+Voter ID: ${currentVoterData.voter_id}
+Issued: ${formatDate(currentVoterData.issued_at)}
+Expires: ${formatDate(currentVoterData.expires_at)}
+
+This is your official digital voter card for university elections.
+Keep this information secure and use it to vote in elections.
+    `;
+    
+    const blob = new Blob([cardData], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `voter-card-${currentVoterData.student_number}.txt`;
+    link.click();
+    URL.revokeObjectURL(url);
+}
+
+function printCard() {
+    const cardElement = document.querySelector('.voter-card-container');
+    const printWindow = window.open('', '_blank');
+    
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>Digital Voter Card</title>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+            <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+            <style>
+                @media print {
+                    .no-print { display: none !important; }
+                    body { margin: 0; }
+                }
+            </style>
+        </head>
+        <body>
+            ${cardElement.outerHTML}
+        </body>
+        </html>
+    `);
+    
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+}
+
+function downloadQR() {
+    if (!currentVoterData) return;
+    
+    const link = document.createElement('a');
+    link.href = 'data:image/png;base64,' + currentVoterData.qr_code;
+    link.download = `voter-qr-${currentVoterData.student_number}.png`;
+    link.click();
+}
+</script>
+
+<style>
+.voter-card-container {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.voter-card-container .card-body {
+    background: white;
+    color: #333;
+}
+
+.qr-code-container {
+    border: 2px solid #007bff;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+}
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    .voter-card-container {
+        box-shadow: none !important;
+        border: 2px solid #000;
+    }
+}
+</style>
+{% endblock %}
